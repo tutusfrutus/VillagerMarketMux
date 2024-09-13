@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.*;
@@ -25,6 +26,14 @@ import java.util.*;
 import static net.bestemor.villagermarket.shop.ItemMode.*;
 
 public class ShopItem {
+
+    public double getKingdomDiscount() {
+        return kingdomDiscount;
+    }
+
+    public void setKingdomDiscount(double kingdomDiscount) {
+        this.kingdomDiscount = kingdomDiscount;
+    }
 
     public enum LimitMode {
         SERVER,
@@ -47,6 +56,7 @@ public class ShopItem {
     private ItemStack itemTrade;
 
     private int discount = 0;
+    private double kingdomDiscount = 0;
     private int limit = 0;
     private LimitMode limitMode = LimitMode.PLAYER;
     private String cooldown = "never";
@@ -141,7 +151,9 @@ public class ShopItem {
         } else if (!applyDiscount || discount <= 0) {
             return buyPrice;
         } else {
-            return buyPrice.subtract(buyPrice.multiply(BigDecimal.valueOf(discount / 100.0)));
+            return buyPrice.multiply(BigDecimal.valueOf(100.00 - kingdomDiscount))
+                    .divide(BigDecimal.valueOf(100.00), MathContext.DECIMAL128);
+            //return buyPrice.subtract(buyPrice.multiply(BigDecimal.valueOf(discount / 100.0)));
         }
     }
     public Material getType() { return item.getType(); }

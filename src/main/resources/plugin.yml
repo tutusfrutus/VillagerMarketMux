@@ -26,9 +26,9 @@ commands:
     usage: /vm help
     aliases:
       - villagermarket
-  shop:
+  adminShop:
     description: Open the default admin shop
-    usage: /shop
+    usage: /adminShop
 
 permissions:
   villagermarket.command.shop:

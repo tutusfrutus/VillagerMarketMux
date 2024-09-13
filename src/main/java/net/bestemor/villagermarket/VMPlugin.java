@@ -120,7 +120,7 @@ public class VMPlugin extends CorePlugin {
                 .build();
 
         if (!ConfigManager.getString("default_admin_shop").isEmpty()) {
-            getCommand("shop").setExecutor(new ShopCommand(this));
+            getCommand("adminShop").setExecutor(new ShopCommand(this));
         }
         module.register("vm");
     }

@@ -15,8 +15,10 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.MetadataValue;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -134,6 +136,11 @@ public class Shopfront {
             if (item == null) {
                 continue;
             }
+            if(player.hasMetadata("MuxMCDiscount")) {
+                MetadataValue discountMetadataForPlayer = player.getMetadata("MuxMCDiscount").getFirst();
+                double discountPercentageForPlayer = discountMetadataForPlayer.asDouble();
+                item.setKingdomDiscount(BigDecimal.valueOf(discountPercentageForPlayer).intValueExact());
+            }
             customerInventory.setItem(slot, item.getCustomerItem(player));
         }
         buildBottom(customerInventory);
@@ -180,6 +187,7 @@ public class Shopfront {
                 break;
             case CUSTOMER:
                 Inventory i = getCustomerInventory(player);
+                this.update();
                 player.openInventory(i);
                 customerInventories.put(player.getUniqueId(), i);
                 break;

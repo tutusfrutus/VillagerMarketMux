@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.Date;
 
 public class AdminShop extends VillagerShop {
@@ -37,6 +38,11 @@ public class AdminShop extends VillagerShop {
         Economy economy = plugin.getEconomy();
 
         BigDecimal price = shopItem.getSellPrice();
+
+        if(player.hasMetadata("MuxMCDiscount")) {
+            price = shopItem.getBuyPrice().multiply(BigDecimal.valueOf(100.00 - shopItem.getKingdomDiscount()))
+                    .divide(BigDecimal.valueOf(100.00), MathContext.DECIMAL128);
+        }
 
         if (!shopItem.verifyPurchase(player, ItemMode.SELL)) {
             return;

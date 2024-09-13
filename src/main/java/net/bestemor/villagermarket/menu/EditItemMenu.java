@@ -18,8 +18,10 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.MetadataValue;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -292,6 +294,7 @@ public class EditItemMenu extends Menu {
                 player.sendMessage(ConfigManager.getMessage("messages.not_number"));
                 return;
             }
+            // TODO: Discounts checken.
             int discount = Integer.parseInt(amountS);
             if (discount < 0 || discount > 100) {
                 typeDiscount(player);
