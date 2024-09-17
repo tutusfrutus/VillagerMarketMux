@@ -401,15 +401,37 @@ public class ShopItem {
             builder.replace("%price%", ConfigManager.getString("quantity.free"));
             builder.replace("%price_per_unit%", ConfigManager.getString("quantity.free"));
         } else if (mode != BUY_AND_SELL) {
-            if (discount > 0) {
-                ChatColor c = VMUtils.getCodeBeforePlaceholder(ConfigManager.getStringList(lorePath), "%price%");
-                String prePrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
-                String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice(true, p)).build();
-                builder.replace("%price%", "§m" + prePrice + c + " " + currentPrice);
+            if(mode == BUY) {
+                if (discount > 0) {
+                    ChatColor c = VMUtils.getCodeBeforePlaceholder(ConfigManager.getStringList(lorePath), "%price%");
+                    String prePrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
+                    String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice(true, p)).build();
+                    builder.replace("%price%", "§m" + prePrice + c + " " + currentPrice);
+                } else {
+                    builder.replaceCurrency("%price%", getSellPrice(false, p));
+                }
+                builder.replaceCurrency("%price_per_unit%", getSellPrice(false, p).divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
+            } else if(mode == SELL) {
+                if (discount > 0) {
+                    ChatColor c = VMUtils.getCodeBeforePlaceholder(ConfigManager.getStringList(lorePath), "%price%");
+                    String prePrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
+                    String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice()).build();
+                    builder.replace("%price%", "§m" + prePrice + c + " " + currentPrice);
+                } else {
+                    builder.replaceCurrency("%price%", getSellPrice());
+                }
+                builder.replaceCurrency("%price_per_unit%", getSellPrice().divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
             } else {
-                builder.replaceCurrency("%price%", getSellPrice(false, p));
+                if (discount > 0) {
+                    ChatColor c = VMUtils.getCodeBeforePlaceholder(ConfigManager.getStringList(lorePath), "%price%");
+                    String prePrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
+                    String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice(true, p)).build();
+                    builder.replace("%price%", "§m" + prePrice + c + " " + currentPrice);
+                } else {
+                    builder.replaceCurrency("%price%", getSellPrice(false, p));
+                }
+                builder.replaceCurrency("%price_per_unit%", getSellPrice(false, p).divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
             }
-            builder.replaceCurrency("%price_per_unit%", getSellPrice(false, p).divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
         } else {
             boolean isCustomerMenu = path.equals("shopfront");
             if (isAdmin && !isCustomerMenu) {
