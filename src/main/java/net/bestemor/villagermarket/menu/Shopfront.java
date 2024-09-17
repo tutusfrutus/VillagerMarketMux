@@ -15,10 +15,8 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.MetadataValue;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +58,7 @@ public class Shopfront {
         this.size = (isInfinite ? 54 : shop.getShopSize());
 
         String editorTitle = ConfigManager.getString("menus.edit_shopfront.title").replace("%shop%", shop.getShopName());
-        String detailedTitle =  (ConfigManager.getString("menus.shopfront.title") + " " + ConfigManager.getString("menus.shopfront.detail_suffix"))
+        String detailedTitle = (ConfigManager.getString("menus.shopfront.title") + " " + ConfigManager.getString("menus.shopfront.detail_suffix"))
                 .replace("%shop%", shop.getShopName());
 
         if (isInfinite) {
@@ -90,7 +88,9 @@ public class Shopfront {
             int start = page * 45;
             int end = start + 44;
             for (int slot : shop.getShopfrontHolder().getItemList().keySet()) {
-                if (slot < start || slot > end) { continue; }
+                if (slot < start || slot > end) {
+                    continue;
+                }
                 items.put(slot - start, shop.getShopfrontHolder().getItemList().get(slot));
             }
         } else {
@@ -145,6 +145,7 @@ public class Shopfront {
 
         return customerInventory;
     }
+
     private void updateDetailedInventory() {
         detailedInventory.clear();
         for (Integer slot : items.keySet()) {
@@ -162,6 +163,7 @@ public class Shopfront {
             detailedInventory.setItem(size - 1, details);
         }
     }
+
     private void updateEditorInventory() {
         editorInventory.clear();
         for (Integer slot : items.keySet()) {
@@ -182,7 +184,6 @@ public class Shopfront {
                 break;
             case CUSTOMER:
                 Inventory i = getCustomerInventory(player);
-                this.update();
                 player.openInventory(i);
                 customerInventories.put(player.getUniqueId(), i);
                 break;
@@ -196,7 +197,7 @@ public class Shopfront {
 
     private void buildBottom(Inventory inventory) {
         if (isInfinite) {
-            for (int i = inventory.getSize() - 9; i < inventory.getSize(); i ++) {
+            for (int i = inventory.getSize() - 9; i < inventory.getSize(); i++) {
                 inventory.setItem(i, filler);
             }
             if (page != 0) {
@@ -234,8 +235,12 @@ public class Shopfront {
 
         @EventHandler
         public void onClick(InventoryClickEvent event) {
-            if (this.player != event.getWhoClicked()) { return; }
-            if (event.getRawSlot() < 0) { return; }
+            if (this.player != event.getWhoClicked()) {
+                return;
+            }
+            if (event.getRawSlot() < 0) {
+                return;
+            }
 
             if (type == Type.DETAILED || type == Type.CUSTOMER) {
                 event.setCancelled(true);
@@ -254,7 +259,7 @@ public class Shopfront {
             if (event.getRawSlot() == event.getView().getTopInventory().getSize() - 1) {
                 event.setCancelled(true);
                 boolean owner;
-                if (shop instanceof PlayerShop){
+                if (shop instanceof PlayerShop) {
                     PlayerShop playerShop = (PlayerShop) shop;
                     owner = playerShop.hasOwner() && playerShop.getOwnerUUID().equals(player.getUniqueId());
                 } else {
@@ -291,7 +296,7 @@ public class Shopfront {
 
                         int slot = event.getSlot() + page * 45;
                         ItemStack cursor = event.getCursor();
-                        
+
                         if (cursor != null && cursor.getType() != Material.AIR) {
                             if (plugin.getShopManager().isBlackListed(cursor.getType())) {
                                 player.sendMessage(ConfigManager.getMessage("messages.blacklisted"));
@@ -311,7 +316,7 @@ public class Shopfront {
                                 shopItem.openEditor(player, shop, page);
                             }
                         }
-                        
+
                         break;
                     case CUSTOMER:
                         if (Instant.now().isBefore(nextClick)) {
@@ -331,13 +336,17 @@ public class Shopfront {
 
         @EventHandler
         public void onDrag(InventoryDragEvent event) {
-            if ((Player) event.getWhoClicked() != this.player) { return; }
+            if ((Player) event.getWhoClicked() != this.player) {
+                return;
+            }
             event.setCancelled(true);
         }
 
         @EventHandler
         public void onClose(InventoryCloseEvent event) {
-            if (this.player != event.getPlayer()) { return; }
+            if (this.player != event.getPlayer()) {
+                return;
+            }
             customerInventories.remove(player.getUniqueId());
 
             HandlerList.unregisterAll(this);
@@ -376,7 +385,7 @@ public class Shopfront {
 
                     open(player, Type.EDITOR);
                     player.playSound(player.getLocation(), ConfigManager.getSound("sounds.add_item"), 0.5f, 1);
-                    CreateShopItemsEvent createShopItemsEvent = new CreateShopItemsEvent(player,shop, shopItem);
+                    CreateShopItemsEvent createShopItemsEvent = new CreateShopItemsEvent(player, shop, shopItem);
                     Bukkit.getPluginManager().callEvent(createShopItemsEvent);
 
                 });
@@ -394,7 +403,9 @@ public class Shopfront {
 
         @EventHandler
         public void onDrop(PlayerDropItemEvent event) {
-            if (event.getPlayer() != player) { return; }
+            if (event.getPlayer() != player) {
+                return;
+            }
             event.setCancelled(true);
         }
     }

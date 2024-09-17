@@ -37,7 +37,7 @@ public class AdminShop extends VillagerShop {
         Economy economy = plugin.getEconomy();
 
         BigDecimal price = shopItem.getSellPrice(true, player);
-
+Bukkit.getLogger().info("Buy price = " + price);
         if (!shopItem.verifyPurchase(player, ItemMode.SELL)) {
             return;
         }
@@ -134,7 +134,8 @@ public class AdminShop extends VillagerShop {
     public void buyCommand(Player player, ShopItem shopItem) {
         Economy economy = plugin.getEconomy();
 
-        BigDecimal price = shopItem.getSellPrice();
+        BigDecimal price = shopItem.getSellPrice(true, player);
+
         if (economy.getBalance(player) < price.doubleValue()) {
             player.sendMessage(ConfigManager.getMessage("messages.not_enough_money"));
             return;

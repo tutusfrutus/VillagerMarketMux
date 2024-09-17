@@ -6,6 +6,7 @@ import net.bestemor.core.config.VersionUtils;
 import net.bestemor.villagermarket.VMPlugin;
 import net.bestemor.villagermarket.menu.EditItemMenu;
 import net.bestemor.villagermarket.menu.StorageHolder;
+import net.bestemor.villagermarket.utils.PlayerUtils;
 import net.bestemor.villagermarket.utils.VMUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -153,8 +154,8 @@ public class ShopItem {
         if (sellPrice == null) {
             return BigDecimal.ZERO;
         }
-        if (player.hasMetadata("MuxMCDiscount")) {
-            double playerBasedDiscount = player.getMetadata("MuxMCDiscount").getFirst().asDouble();
+        if (player != null && player.hasMetadata("MuxMCDiscount")) {
+            double playerBasedDiscount = PlayerUtils.getDiscountForPlayer(player);
             BigDecimal actualPlayerPrize = getSellPrice().multiply(BigDecimal.valueOf(100.00 - playerBasedDiscount))
                     .divide(BigDecimal.valueOf(100.00), MathContext.DECIMAL128);
             if (!applyDiscount || playerBasedDiscount <= 0) {
@@ -403,19 +404,19 @@ public class ShopItem {
             if (discount > 0) {
                 ChatColor c = VMUtils.getCodeBeforePlaceholder(ConfigManager.getStringList(lorePath), "%price%");
                 String prePrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
-                String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice()).build();
+                String currentPrice = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice(true, p)).build();
                 builder.replace("%price%", "§m" + prePrice + c + " " + currentPrice);
             } else {
-                builder.replaceCurrency("%price%", getSellPrice());
+                builder.replaceCurrency("%price%", getSellPrice(false, p));
             }
-            builder.replaceCurrency("%price_per_unit%", getSellPrice().divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
+            builder.replaceCurrency("%price_per_unit%", getSellPrice(false, p).divide(BigDecimal.valueOf(getAmount()), RoundingMode.HALF_UP));
         } else {
             boolean isCustomerMenu = path.equals("shopfront");
             if (isAdmin && !isCustomerMenu) {
-                builder.replace("%price%", VMUtils.formatBuySellPrice(getBuyPrice(false), getSellPrice(false)));
+                builder.replace("%price%", VMUtils.formatBuySellPrice(getBuyPrice(false), getSellPrice(false, p)));
             } else if (discount > 0) {
                 String preSell = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", sellPrice).build();
-                String currentSell = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice()).build();
+                String currentSell = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getSellPrice(false, p)).build();
                 String preBuy = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", buyPrice).build();
                 String currentBuy = ConfigManager.getCurrencyBuilder("%price%").replaceCurrency("%price%", getBuyPrice()).build();
 
@@ -424,8 +425,8 @@ public class ShopItem {
                 builder.replace("%buy_price%", "§m" + (isCustomerMenu ? preSell : preBuy) + cBuy + " " + (isCustomerMenu ? currentSell : currentBuy));
                 builder.replace("%sell_price%", "§m" + (isCustomerMenu ? preBuy : preSell) + cSell + " " + (isCustomerMenu ? currentBuy : currentSell));
             } else {
-                builder.replaceCurrency("%buy_price%", isCustomerMenu ? getSellPrice() : getBuyPrice());
-                builder.replaceCurrency("%sell_price%", isCustomerMenu ? getBuyPrice() : getSellPrice());
+                builder.replaceCurrency("%buy_price%", isCustomerMenu ? getSellPrice(false, p) : getBuyPrice());
+                builder.replaceCurrency("%sell_price%", isCustomerMenu ? getBuyPrice() : getSellPrice(false, p));
             }
         }
         List<String> lore = builder.build();
