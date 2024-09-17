@@ -8,6 +8,7 @@ import net.bestemor.villagermarket.menu.EditItemMenu;
 import net.bestemor.villagermarket.menu.StorageHolder;
 import net.bestemor.villagermarket.utils.VMUtils;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import scala.concurrent.impl.FutureConvertersImpl;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -26,14 +28,6 @@ import java.util.*;
 import static net.bestemor.villagermarket.shop.ItemMode.*;
 
 public class ShopItem {
-
-    public double getKingdomDiscount() {
-        return kingdomDiscount;
-    }
-
-    public void setKingdomDiscount(double kingdomDiscount) {
-        this.kingdomDiscount = kingdomDiscount;
-    }
 
     public enum LimitMode {
         SERVER,
@@ -56,7 +50,7 @@ public class ShopItem {
     private ItemStack itemTrade;
 
     private int discount = 0;
-    private double kingdomDiscount = 0;
+
     private int limit = 0;
     private LimitMode limitMode = LimitMode.PLAYER;
     private String cooldown = "never";
@@ -151,11 +145,27 @@ public class ShopItem {
         } else if (!applyDiscount || discount <= 0) {
             return buyPrice;
         } else {
-            return buyPrice.multiply(BigDecimal.valueOf(100.00 - kingdomDiscount))
-                    .divide(BigDecimal.valueOf(100.00), MathContext.DECIMAL128);
-            //return buyPrice.subtract(buyPrice.multiply(BigDecimal.valueOf(discount / 100.0)));
+            return buyPrice.subtract(buyPrice.multiply(BigDecimal.valueOf(discount / 100.0)));
         }
     }
+
+    public BigDecimal getSellPrice(boolean applyDiscount, Player player) {
+        if (sellPrice == null) {
+            return BigDecimal.ZERO;
+        }
+        if (player.hasMetadata("MuxMCDiscount")) {
+            double playerBasedDiscount = player.getMetadata("MuxMCDiscount").getFirst().asDouble();
+            BigDecimal actualPlayerPrize = getSellPrice().multiply(BigDecimal.valueOf(100.00 - playerBasedDiscount))
+                    .divide(BigDecimal.valueOf(100.00), MathContext.DECIMAL128);
+            if (!applyDiscount || playerBasedDiscount <= 0) {
+                return actualPlayerPrize;
+            } else {
+                return actualPlayerPrize.subtract(actualPlayerPrize.multiply(BigDecimal.valueOf(discount / 100.0)));
+            }
+        }
+        return sellPrice;
+    }
+
     public Material getType() { return item.getType(); }
     public int getSlot() {
         return slot;

@@ -101,8 +101,8 @@ public class Shopfront {
             for (ShopItem shopItem : shopItems) {
                 shopItem.reloadMeta(shop);
             }
-        } catch (ConcurrentModificationException ignore) {}
-
+        } catch (ConcurrentModificationException ignore) {
+        }
     }
 
     public void update() {
@@ -135,11 +135,6 @@ public class Shopfront {
             ShopItem item = items.get(slot);
             if (item == null) {
                 continue;
-            }
-            if(player.hasMetadata("MuxMCDiscount")) {
-                MetadataValue discountMetadataForPlayer = player.getMetadata("MuxMCDiscount").getFirst();
-                double discountPercentageForPlayer = discountMetadataForPlayer.asDouble();
-                item.setKingdomDiscount(BigDecimal.valueOf(discountPercentageForPlayer).intValueExact());
             }
             customerInventory.setItem(slot, item.getCustomerItem(player));
         }
@@ -302,7 +297,7 @@ public class Shopfront {
                                 player.sendMessage(ConfigManager.getMessage("messages.blacklisted"));
 
                             } else {
-                                createShopItem(cursor, slot);
+                                createShopItem(cursor, slot, player);
                             }
                             DropListener dropListener = new DropListener(player);
                             Bukkit.getPluginManager().registerEvents(dropListener, plugin);
@@ -348,7 +343,7 @@ public class Shopfront {
             HandlerList.unregisterAll(this);
         }
 
-        private void createShopItem(ItemStack i, int slot) {
+        private void createShopItem(ItemStack i, int slot, Player player) {
 
             player.sendMessage(ConfigManager.getMessage("messages.type_amount"));
             ShopItem shopItem = new ShopItem(plugin, i.clone(), slot);

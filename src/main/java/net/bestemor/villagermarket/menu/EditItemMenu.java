@@ -18,10 +18,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.metadata.MetadataValue;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -51,19 +49,19 @@ public class EditItemMenu extends Menu {
 
         int backSlot = ConfigManager.getInt("menus.edit_item.back_slot");
         content.setClickable(backSlot, Clickable.fromConfig("items.back", event -> {
-            Player player = (Player) event.getWhoClicked(); 
+            Player player = (Player) event.getWhoClicked();
             player.playSound(player.getLocation(), ConfigManager.getSound("sounds.menu_click"), 0.5f, 1);
             shop.getShopfrontHolder().open(player, Shopfront.Type.EDITOR, this.page);
         }));
-        
+
         content.setPlaced(PlacedClickable.fromConfig("menus.edit_item.items.delete", event -> {
             Player player = (Player) event.getWhoClicked();
-            
+
             new ConfirmActionMenu(() -> {
                 shop.getShopfrontHolder().removeItem(shopItem.getSlot());
                 player.playSound(player.getLocation(), ConfigManager.getSound("sounds.remove_item"), 1, 1);
                 shop.openInventory(player, ShopMenu.EDIT_SHOPFRONT);
-                DeleteShopItemEvent deleteShopItemEvent = new DeleteShopItemEvent(player,this.shop, shopItem);
+                DeleteShopItemEvent deleteShopItemEvent = new DeleteShopItemEvent(player, this.shop, shopItem);
                 Bukkit.getPluginManager().callEvent(deleteShopItemEvent);
             }, () -> open(player)).open(player);
         }));
@@ -78,7 +76,7 @@ public class EditItemMenu extends Menu {
         int slot = ConfigManager.getInt("menus.edit_item.item_slot");
         content.setClickable(slot, Clickable.empty(shopItem.getRawItem()));
 
-        int cooldownSlot = ConfigManager.getInt( p + "limit_cooldown.slot");
+        int cooldownSlot = ConfigManager.getInt(p + "limit_cooldown.slot");
         int commandSlot = ConfigManager.getInt(p + "command.slot");
         int buyLimitSlot = ConfigManager.getInt(p + "buy_limit.slot");
         int playerLimitSlot = ConfigManager.getInt(p + "player_limit.slot");
@@ -103,7 +101,7 @@ public class EditItemMenu extends Menu {
         } else if (shopItem.getMode() == ItemMode.BUY_AND_SELL) {
             priceBuilder.replace("%price%", VMUtils.formatBuySellPrice(shopItem.getBuyPrice(false), shopItem.getSellPrice(false)));
         } else {
-            priceBuilder.replaceCurrency("%price%",  shopItem.getSellPrice(false));
+            priceBuilder.replaceCurrency("%price%", shopItem.getSellPrice(false));
         }
         ItemStack priceItem = priceBuilder.build();
         if (shopItem.getMode() == ItemMode.BUY_AND_SELL) {
@@ -136,7 +134,7 @@ public class EditItemMenu extends Menu {
         }
 
         if (shopItem.getMode() == ItemMode.COMMAND) {
-            ItemStack commandItem =  ConfigManager.getItem(p + "command").build();
+            ItemStack commandItem = ConfigManager.getItem(p + "command").build();
             ItemMeta meta = commandItem.getItemMeta();
             List<String> lore = meta.getLore();
 
@@ -176,17 +174,17 @@ public class EditItemMenu extends Menu {
             event.getView().close();
             typeAmount((Player) event.getWhoClicked());
         }));
-        
+
         content.setClickable(ConfigManager.getInt(p + "mode.slot"), Clickable.of(modeItem, event -> {
             shopItem.cycleTradeMode();
             update();
         }));
         content.setClickable(ConfigManager.getInt(p + "price.slot"), Clickable.of(priceItem, event -> {
-            Player player = (Player) event.getWhoClicked(); 
+            Player player = (Player) event.getWhoClicked();
             player.playSound(player.getLocation(), ConfigManager.getSound("sounds.menu_click"), 0.5f, 1);
             if (event.getCursor() != null && event.getCursor().getType() != Material.AIR) {
                 //Set Permissions
-                if(player.hasPermission("villagermarket.set_trade_type")){
+                if (player.hasPermission("villagermarket.set_trade_type")) {
                     player.sendMessage(ConfigManager.getMessage("messages.type_amount"));
                     ItemStack clone = event.getCursor().clone();
                     event.getView().close();
@@ -250,9 +248,9 @@ public class EditItemMenu extends Menu {
                 player.sendMessage(ConfigManager.getMessage("messages.not_valid_range"));
                 return;
             }
-            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player,this.shop, shopItem,result, EditType.AMOUNT);
+            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player, this.shop, shopItem, result, EditType.AMOUNT);
             Bukkit.getPluginManager().callEvent(editShopItemEvent);
-            if(editShopItemEvent.isCancelled()){
+            if (editShopItemEvent.isCancelled()) {
                 return;
             }
             player.sendMessage(ConfigManager.getMessage("messages.amount_successful"));
@@ -271,9 +269,9 @@ public class EditItemMenu extends Menu {
                 player.sendMessage(ConfigManager.getMessage("messages.max_item_price"));
                 return;
             }
-            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player,this.shop, shopItem,result,EditType.PRICE);
+            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player, this.shop, shopItem, result, EditType.PRICE);
             Bukkit.getPluginManager().callEvent(editShopItemEvent);
-            if(editShopItemEvent.isCancelled()){
+            if (editShopItemEvent.isCancelled()) {
                 return;
             }
             player.sendMessage(ConfigManager.getMessage("messages.price_successful"));
@@ -294,7 +292,6 @@ public class EditItemMenu extends Menu {
                 player.sendMessage(ConfigManager.getMessage("messages.not_number"));
                 return;
             }
-            // TODO: Discounts checken.
             int discount = Integer.parseInt(amountS);
             if (discount < 0 || discount > 100) {
                 typeDiscount(player);
@@ -306,9 +303,9 @@ public class EditItemMenu extends Menu {
                 open(player);
                 return;
             }
-            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player,this.shop, shopItem,new BigDecimal(discount),EditType.DISCOUNT);
+            EditShopItemEvent editShopItemEvent = new EditShopItemEvent(player, this.shop, shopItem, new BigDecimal(discount), EditType.DISCOUNT);
             Bukkit.getPluginManager().callEvent(editShopItemEvent);
-            if(editShopItemEvent.isCancelled()){
+            if (editShopItemEvent.isCancelled()) {
                 return;
             }
 
